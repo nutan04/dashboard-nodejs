@@ -8,3 +8,11 @@ exports.getAllUsers = async (req, res) => {
         res.status(500).json({ message: err.message });
     }
 }
+
+exports.createUser = async (req, res) => {
+    try {
+
+    } catch (err) {
+        res.status(500).json({ message: err.message });
+    }
+}
