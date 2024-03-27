@@ -45,7 +45,19 @@ const AdressSchema = new mongoose.Schema({
         type: String,
         required: true,
     },
+    created_at: { type: Date },
+    updated_at: { type: Date }
 
+
+});
+
+AdressSchema.pre('save', function (next) {
+    now = new Date();
+    this.updated_at = now;
+    if (!this.created_at) {
+        this.created_at = now;
+    }
+    next();
 });
 
 const Delivery_address = mongoose.model('Delivery_address', AdressSchema);
