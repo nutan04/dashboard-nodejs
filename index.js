@@ -3,6 +3,8 @@ const mongoose = require('mongoose');
 const userRoutes = require('./routes/userRoutes')
 const productRoutes = require('./routes/productRoutes')
 const customerRoutes = require('./routes/customerRoutes')
+const shoppingRoutes = require('./routes/shoppingRoutes')
+
 
 
 const session = require('express-session');
@@ -21,6 +23,7 @@ app.use(express.json());
 app.use('/users', userRoutes)
 app.use('/products', productRoutes)
 app.use('/customers', customerRoutes)
+app.use('/', shoppingRoutes)
 
 
 

@@ -1,4 +1,5 @@
 const Product = require('../models/product');
+const User = require('../models/user')
 
 exports.getAllProducts = async (req, res) => {
     try {
@@ -43,11 +44,23 @@ exports.createProduct = async (req, res) => {
 
 exports.getProduct = async (req, res) => {
     try {
-        const user = await Product.findById(req.params.id);
-        if (!user) {
-            return res.status(404).json({ message: 'user not found' });
+        const product = await Product.findById(req.params.id);
+        if (!product) {
+            return res.status(404).json({ message: 'product not found' });
         }
-        res.json(user);
+        const purchasePrice = parseFloat(product.purchase_price);
+        const discount = parseFloat(product.discount);
+        const sellingPrice = purchasePrice - (purchasePrice * (discount / 100));
+        let status = "";
+        if (product.quantity != 0) {
+            status = "In Stock"
+        } else {
+            status = "Out of Stock"
+        }
+
+        // Add selling price to the product object
+        const productWithSellingPrice = { ...product.toObject(), sellingPrice, status };
+        res.json(productWithSellingPrice);
     } catch (err) {
         res.status(500).json({ message: err.message });
     }
@@ -79,4 +92,14 @@ exports.deleteProduct = async (req, res) => {
     } catch (err) {
         res.status(400).json({ message: err.message });
     }
+}
+
+exports.greeting = async (req, res) => {
+    const email = req.user;
+
+    const existUser = await User.findOne({ email: email });
+
+    res.send(existUser);
+
+
 }

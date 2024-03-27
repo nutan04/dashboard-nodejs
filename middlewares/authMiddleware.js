@@ -1,19 +1,22 @@
-
+const jwt = require('jsonwebtoken');
 
 const authMiddleware = (req, res, next) => {
-    const authorization = req.headers['authorization'];
-    const _token = req.session.newtoken;
+    const token = req.headers['authorization'];
 
-    if (!authorization) {
-        return res.status(401).json({ message: "Authorization header is missing" });
+    if (!token) {
+        return res.status(401).json({ message: "Token is missing" });
     }
 
-    if (_token !== authorization) {
+    try {
+        // Verify the token (without 'Bearer' prefix)
+        const decoded = jwt.verify(token, 'your_secret_key'); // Change 'your_secret_key' to your actual secret
+        // Attach user details to the request object
+        req.user = decoded.email;
+        next();
+    } catch (error) {
+        console.error('Error verifying token:', error);
         return res.status(401).json({ message: "Invalid token" });
     }
-
-    // If the token is valid, proceed to the next middleware/route handler
-    next();
 };
 
 module.exports = authMiddleware;

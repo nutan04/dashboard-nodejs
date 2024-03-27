@@ -1,5 +1,6 @@
 const Customer = require('../models/customer');
 const bcrypt = require('bcrypt');
+const jwt = require('jsonwebtoken');
 
 
 
@@ -44,8 +45,12 @@ exports.createCustomer = async (req, res) => {
 }
 exports.updateCustomer = async (req, res) => {
     try {
-        const newpassword = await bcrypt.hash(req.body.password, 10);
-        req.body.password = newpassword
+
+        if (req.body.password) {
+            const newpassword = await bcrypt.hash(req.body.password, 10);
+            req.body.password = newpassword
+        }
+
         const updatedUser = await Customer.findByIdAndUpdate(req.params.id, req.body, { new: true });
         if (!updatedUser) {
             res.json({ message: "customer not found" });
@@ -69,4 +74,31 @@ exports.deleteCustomer = async (req, res) => {
         res.status(400).json({ message: err.message });
     }
 }
+
+exports.loginCustomer = async (req, res) => {
+    const { email, password } = req.body;
+    try {
+
+        const existUser = await Customer.findOne({ email: email });
+        if (existUser) {
+            const passwordMatch = await bcrypt.compare(password, existUser.password);
+            if (passwordMatch) {
+                const token = jwt.sign({ email: existUser.email }, 'your_secret_key');
+                // Store token in session
+                req.session.customertoken = token;
+
+                res.status(200).json({ message: "customer login successfully", _token: token, user: existUser });
+            } else {
+                res.status(404).json({ message: "Invalid username or password please check once" });
+            }
+        } else {
+            res.status(200).json({ message: "Invalid username or password please check once" });
+        }
+
+    } catch (err) {
+        res.status(500).json({ message: err.message });
+    }
+
+}
+
 
